@@ -1,0 +1,11 @@
+state/
+downloads/
+test-output/
+*.aria2
+*.pem
+*.key
+*.log
+*.zip
+cookies.txt
+proxy.txt
+__pycache__/

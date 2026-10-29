@@ -1,0 +1,6 @@
+{
+  "downloads": [
+    { "Source": "https://example.com/file.zip", "FileName": "example.zip" },
+    { "Source": "https://example.com/manual.pdf" }
+  ]
+}
