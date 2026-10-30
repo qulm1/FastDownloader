@@ -1,4 +1,4 @@
-﻿name: Release
+name: Release
 
 on:
   push:
@@ -41,8 +41,10 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $dist = Join-Path $env:RUNNER_TEMP 'dist'
-          ./BuildRelease.ps1 -Version '${{ steps.version.outputs.version }}' -OutputDir $dist
-          if ($LASTEXITCODE -ne 0) { throw 'BuildRelease.ps1 failed.' }
+          # The script has its own Stop preference and throws on failure, so a catch is
+          # enough; $LASTEXITCODE is not meaningful for a .ps1 invocation.
+          try { ./BuildRelease.ps1 -Version '${{ steps.version.outputs.version }}' -OutputDir $dist }
+          catch { throw ('BuildRelease.ps1 failed: ' + $_.Exception.Message) }
 
           $lines = Get-ChildItem -LiteralPath $dist -Filter *.zip | Sort-Object Name | ForEach-Object {
             $hash = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
