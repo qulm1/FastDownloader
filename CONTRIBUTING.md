@@ -8,6 +8,8 @@
 
 ## 修改和测试
 
+窗口源码和原生启动器构建方法见 WINDOW_GUIDE.md。BuildWindow.ps1 必须使用 powershell.exe；生成的 bin/FastDownloader.exe 不提交 Git，发行时重新编译。引擎暂停、续传测试不能代替原生界面按钮、浮层和重启流程的桌面验收。
+
 1. 从 `main` 新建分支；每个 PR 解决一个清晰的问题，保持 Windows PowerShell 5.1 兼容。
 2. 增加能复现原问题的测试，使用独立临时目录和可控本机服务，不修改使用者已有任务、系统证书或下载结果。
 3. 在有 D 盘的 Windows 环境执行：

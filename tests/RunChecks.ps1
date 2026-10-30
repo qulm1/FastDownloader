@@ -42,6 +42,8 @@ try {
     Invoke-Check 'Temporary TLS certificate' $pwsh @('-NoProfile','-File',(Join-Path $PSScriptRoot 'NewTestCertificate.ps1'),'-OutputDir',$env:TEST_CERT_ROOT)
     Invoke-Check 'FTP, Metalink and TLS' $node @((Join-Path $PSScriptRoot 'TestProtocols.mjs'))
     Invoke-Check 'Injected engine failure' $ps51 @('-NoProfile','-ExecutionPolicy','Bypass','-File',(Join-Path $PSScriptRoot 'TestEngineFault.ps1'),'-WorkRoot',$work)
+    Invoke-Check 'Window engine pause/resume/restart' $node @((Join-Path $PSScriptRoot 'TestWindowEngine.mjs'))
+    Invoke-Check 'Offscreen window rendering/layout' $ps51 @('-NoProfile','-NonInteractive','-STA','-ExecutionPolicy','Bypass','-File',(Join-Path $PSScriptRoot 'TestWindowLayout.ps1'),'-WorkRoot',(Join-Path $work 'offscreen'))
     try {
         $package = & (Join-Path $PSScriptRoot 'TestRelease.ps1') -WorkRoot $work
         $env:TEST_PACKAGE_ROOT = $package.portable_root
