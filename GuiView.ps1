@@ -172,4 +172,3 @@ function Get-TaskCardXaml {
 </Border>
 '@
 }
-
