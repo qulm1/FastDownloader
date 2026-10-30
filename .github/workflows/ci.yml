@@ -106,6 +106,14 @@ jobs:
           node tests/TestScenarios.mjs
           if ($LASTEXITCODE -ne 0) { throw "TestScenarios failed with exit code $LASTEXITCODE" }
 
+      - name: WPF controls, offscreen rendering and real download recovery
+        shell: pwsh
+        env:
+          TEST_WORK_ROOT: ${{ runner.temp }}\fastdownloader-tests
+        run: |
+          node tests/TestGui.mjs
+          if ($LASTEXITCODE -ne 0) { throw 'WPF integration tests failed.' }
+
       - name: Upload test evidence
         if: always()
         uses: actions/upload-artifact@v7
@@ -167,13 +175,20 @@ jobs:
           foreach ($zip in $portable, $source) { if (-not (Test-Path -LiteralPath $zip)) { throw "Missing $zip" } }
           $expanded = Join-Path $env:RUNNER_TEMP 'expanded'
           Expand-Archive -LiteralPath $portable -DestinationPath $expanded
-          foreach ($required in 'FastDownload.ps1', 'StartDownload.cmd', 'bin\aria2c.exe', 'LICENSE', 'THIRD_PARTY.md') {
+          foreach ($required in 'FastDownload.ps1', 'StartDownload.cmd', 'FastDownloadGui.ps1', 'StartDownloadGui.cmd', 'GuiApp.ps1', 'GuiTasks.ps1', 'GuiView.ps1', 'GuiEngine.cs', 'bin\aria2c.exe', 'LICENSE', 'THIRD_PARTY.md') {
             if (-not (Test-Path -LiteralPath (Join-Path $expanded $required))) { throw "Portable package is missing $required" }
           }
           foreach ($forbidden in 'state', 'downloads', 'test-output') {
             if (Test-Path -LiteralPath (Join-Path $expanded $forbidden)) { throw "Portable package must not contain $forbidden" }
           }
           Write-Host 'Package checks passed.'
+
+      - name: Run packaged WPF runtime without showing a window
+        shell: powershell
+        run: |
+          $root=Join-Path $env:RUNNER_TEMP 'package-wpf-tests'
+          powershell.exe -NoLogo -NoProfile -NonInteractive -STA -ExecutionPolicy Bypass -File tests/TestGuiPackage.ps1 -WorkRoot $root
+          if ($LASTEXITCODE -ne 0) { throw 'Packaged WPF validation failed.' }
 
       - uses: actions/upload-artifact@v7
         with:

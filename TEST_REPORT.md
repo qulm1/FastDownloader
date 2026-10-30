@@ -16,3 +16,14 @@ BT 与 FTP 是可控本机网络测试，不能证明所有公网节点、认证
 最终便携包在 D 盘“中文 空格”新目录解压验收，不依赖开发源码路径。源码与发行包内主脚本/批量模块/引擎字节一致；发行采用白名单排除了私有 state、缓存、Cookie 与下载结果。日常运行不需要 Node.js。源码包不带第三方引擎，按 THIRD_PARTY.md 获取。
 
 测试脚本默认在系统临时目录创建临时工作区（可用 TEST_WORK_ROOT 覆盖）；协议测试中需要公网对比的那一段可用 SKIP_PUBLIC_HTTPS=1 跳过，其余 FTP、Metalink 与不可信证书断言仍在本机完成。
+
+## 2026-10-30：接续 WPF 图形界面
+
+在 D:\FastDownloader 继续已有 WPF 草稿，保留 2.1.0 的 CLI 参数与呈现层。原 TestDownload、TestFaults、TestFeatures、TestLauncher、TestScenarios、TestProtocols（公网 HTTPS 明确跳过）、TestEngineFault 七个套件在本机全部通过。GitHub 新增的 WPF 检查以实际 CI 结果为准，本地结果不当作远端通过。
+
+- TestGui.mjs / TestWpf.ps1：加载实际 WPF 控件并触发自身按钮事件，全程不显示窗口、不移动鼠标或发送桌面按键。完成本机 HTTP、暂停后字节稳定、继续后进度增长、停止保存断点、顺序队列、重新恢复、未知长度和 404 失败测试，最终文件 SHA-256 与样本一致。
+- 使用自建 Tracker、aria2 做种端和自己生成的私有 torrent，WPF 窗口后端实际完成 torrent 与 magnet 传输；确认下载的是全部样本内容，不能仅凭元数据下载完成就标为成功。
+- XAML 和控件绑定、显式下载目录不被 CLI 导入覆盖、预分配文件不制造 100% 进度、任务筛选和三种布局尺寸均有自动检查。离屏 PNG 使用虚构任务并补画实际窗口背景，不是桌面截图或网速证据。
+- TestGuiPackage.ps1：在独立副本向 state、bin、tests 和 docs 放入私有标记，检查它们均未进入 ZIP；核对 GUI 必需模块、许可、源码包无二进制、便携包源码/引擎哈希，并从中文空格路径的实际 ZIP 解压目录加载 WPF 与系统 .NET 控制模块。
+
+这些测试不冒充实际显示器/DPI、鼠标焦点、系统文件选择器和拖拽手感的实机验收。默认遵守不占用用户桌面的要求。普通用户可双击 StartDownloadGui.cmd 手动验收。

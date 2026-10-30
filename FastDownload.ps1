@@ -525,13 +525,15 @@ function Invoke-Task {
     } finally { if ($null -ne $lock) { $lock.Dispose() } }
 }
 
+function Get-DefaultDownloadDir {
+    # Prefer the D: data drive when the machine has one, otherwise use the profile so the
+    # default works on any Windows installation. Shared by the CLI and the GUI front-end.
+    if (Test-Path -LiteralPath 'D:\') { return 'D:\Downloads\FastDownloads' }
+    return (Join-Path $env:USERPROFILE 'Downloads\FastDownloads')
+}
+
 function Start-Downloader {
-    if (-not $DownloadDir) {
-        # Prefer the D: data drive when the machine has one, otherwise use the profile so
-        # the default works on any Windows installation.
-        if (Test-Path -LiteralPath 'D:\') { $DownloadDir = 'D:\Downloads\FastDownloads' }
-        else { $DownloadDir = Join-Path $env:USERPROFILE 'Downloads\FastDownloads' }
-    }
+    if (-not $DownloadDir) { $DownloadDir = Get-DefaultDownloadDir }
     $destination = [IO.Path]::GetFullPath($DownloadDir)
     if ($ListTasks) { Show-DownloadTasks; return 0 }
     if ($BatchFile -and ($Source -or $Resume)) { Write-Muted '  BatchFile 与 Source/Resume 不能同时使用。'; return 1 }

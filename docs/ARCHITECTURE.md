@@ -15,7 +15,8 @@ given kind of change.
 | `bin/aria2c.exe` | aria2 1.37.0. All network I/O, segmentation, resume, BT, Metalink and checksum work happens here |
 | `BuildRelease.ps1` | Whitelist packager producing the portable and source zips |
 
-There is no daemon, no RPC listener, no database, and no module import. State is
+The CLI has no daemon, RPC listener or database. The WPF UI's temporary authenticated
+loopback control and modules are documented in [GUI.md](GUI.md). State is
 file-based so it can be inspected, backed up, or deleted with a file manager.
 
 ## Lifecycle

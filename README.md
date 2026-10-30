@@ -8,8 +8,9 @@
 *[中文说明](README.zh-CN.md)*
 
 A small, auditable Windows download front-end for [aria2](https://github.com/aria2/aria2):
-paste a link, press Enter, get a verified file. No service, no RPC port, no telemetry,
-no browser integration — one PowerShell script and a bundled engine.
+paste a link, press Enter, get a verified file. No service, telemetry or browser
+integration. The CLI keeps RPC disabled; the optional WPF UI uses authenticated,
+temporary loopback-only engine control. See [the desktop guide](docs/GUI.md).
 
 ```text
 极速下载助手 | aria2 1.37.0
@@ -24,10 +25,10 @@ no browser integration — one PowerShell script and a bundled engine.
 Most download helpers are either GUI applications you cannot audit or one-off
 `aria2c` command lines you keep retyping. FastDownloader sits in between:
 
-- **One file to read.** `FastDownload.ps1` is ~270 lines of plain PowerShell; all
+- **Auditable modules.** The CLI and WPF UI use small, readable source modules; all
   network I/O is delegated to the unmodified aria2 1.37.0 binary in `bin/`.
 - **No persistence.** Nothing is installed: no Windows service, scheduled task,
-  RPC listener, registry edit, firewall rule, or default-browser change.
+  public RPC listener, registry edit, firewall rule, or default-browser change.
 - **Predictable state.** Every task is a folder under `state\jobs\<id>\` holding a
   `task.json` record, the aria2 session file, and a lock. Delete it and the tool
   forgets the task.
@@ -49,6 +50,11 @@ Most download helpers are either GUI applications you cannot audit or one-off
 2. Extract it anywhere — spaces and non-ASCII characters in the path are fine.
 3. Double-click `StartDownload.cmd`.
 4. Paste a download URL and press Enter.
+
+For an actual graphical window, double-click **StartDownloadGui.cmd**. It supports
+task cards, multi-input import, destination selection, progress, pause/resume and
+recovery. Windows PowerShell 5.1 / WPF are built in; no Node.js is needed for daily
+use. The full directory is required. [Desktop usage and tests](docs/GUI.md).
 
 The default destination is `D:\Downloads\FastDownloads\<label>-<task-id>`, one
 sub-directory per task so that different links with the same file name never

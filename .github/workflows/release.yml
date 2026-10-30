@@ -60,7 +60,7 @@ jobs:
           $portable = Join-Path $env:RUNNER_TEMP "dist/FastDownloader-${{ steps.version.outputs.version }}.zip"
           $expanded = Join-Path $env:RUNNER_TEMP 'expanded'
           Expand-Archive -LiteralPath $portable -DestinationPath $expanded
-          foreach ($required in 'FastDownload.ps1', 'StartDownload.cmd', 'bin\aria2c.exe', 'LICENSE', 'THIRD_PARTY.md') {
+          foreach ($required in 'FastDownload.ps1', 'StartDownload.cmd', 'FastDownloadGui.ps1', 'StartDownloadGui.cmd', 'GuiApp.ps1', 'GuiTasks.ps1', 'GuiView.ps1', 'GuiEngine.cs', 'bin\aria2c.exe', 'LICENSE', 'THIRD_PARTY.md') {
             if (-not (Test-Path -LiteralPath (Join-Path $expanded $required))) { throw "Portable package is missing $required" }
           }
           foreach ($forbidden in 'state', 'downloads', 'test-output', 'cookies.txt') {

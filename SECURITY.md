@@ -60,7 +60,9 @@ anonymous. Please give us a reasonable window before public disclosure.
 
 - Certificate validation is always on (`--check-certificate=true`); this Schannel-based
   build cannot pin a custom CA and deliberately does not try.
-- No RPC listener (`--enable-rpc=false`), no service, no scheduled task.
+- CLI has no RPC listener (`--enable-rpc=false`). The optional WPF GUI uses a
+  per-process random secret and temporary loopback-only RPC to its own engine;
+  it does not listen on the LAN or save that secret. No service or scheduled task.
 - Cookie files are read only from a path you pass explicitly; browsers are never read.
 - HTTP basic-auth credentials (`-HttpUser` / `-HttpPassword`) and custom `-Header` values
   are recorded in `state\jobs\<id>\task.json` so a resume can reuse them. They are stored
