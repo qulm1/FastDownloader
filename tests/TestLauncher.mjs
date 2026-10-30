@@ -2,10 +2,14 @@ import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {spawn} from 'node:child_process';
 import {createHash} from 'node:crypto';
-import {mkdtempSync,readdirSync,readFileSync,writeFileSync,copyFileSync,mkdirSync} from 'node:fs';
+import {mkdtempSync,readdirSync,readFileSync,writeFileSync,copyFileSync,mkdirSync,existsSync} from 'node:fs';
+import {homedir,tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
 const home=resolve(import.meta.dirname,'..');
-const work=mkdtempSync(join(process.env.TEST_WORK_ROOT||'D:/CodexNightWork/2026-10-24','launcher-'));
+const work=mkdtempSync(join(process.env.TEST_WORK_ROOT||tmpdir(),'launcher-'));
+// Mirrors the product default: the D: data drive when present, the profile otherwise.
+const defaultRoot=existsSync('D:\\')?'D:\\Downloads\\FastDownloads':join(homedir(),'Downloads','FastDownloads');
+const sep='\\';
 const body=Buffer.alloc(1024*1024,73);
 const server=createServer((req,res)=>{res.writeHead(200,{'Content-Length':body.length});res.end(body)});
 await new Promise(r=>server.listen(0,'127.0.0.1',r));
@@ -24,7 +28,8 @@ try{
  await run('cmd.exe',['/d','/c','StartDownload.cmd'],url+'\r\nQ\r\n');
  const jobs=join(home,'state/jobs');
  const record=readdirSync(jobs).map(id=>JSON.parse(readFileSync(join(jobs,id,'task.json'),'utf8').replace(/^\uFEFF/,''))).find(x=>x.Source===url);
- assert.ok(record);assert.equal(record.Status,'Completed');assert.match(record.OutputDir,/^D:\\Downloads\\FastDownloads\\/i);
+ assert.ok(record);assert.equal(record.Status,'Completed');
+ assert.ok(record.OutputDir.toLowerCase().startsWith(defaultRoot.toLowerCase()+sep),'default output root: '+record.OutputDir);
  const files=readdirSync(record.OutputDir).filter(n=>!n.endsWith('.aria2'));assert.equal(files.length,1);
  assert.equal(createHash('sha256').update(readFileSync(join(record.OutputDir,files[0]))).digest('hex'),createHash('sha256').update(body).digest('hex'));
  evidence.push({name:'Exact default StartDownload.cmd entry, interactive URL/Q, clean state, D default output, complete SHA256',passed:true,output:record.OutputDir});
