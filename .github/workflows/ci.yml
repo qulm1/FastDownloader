@@ -82,7 +82,7 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           New-Item -ItemType Directory -Force -Path $env:TEST_WORK_ROOT | Out-Null
-          foreach ($suite in 'TestDownload', 'TestFaults', 'TestLauncher') {
+          foreach ($suite in 'TestDownload', 'TestFaults', 'TestFeatures', 'TestLauncher') {
             Write-Host "::group::$suite"
             node "tests/$suite.mjs"
             if ($LASTEXITCODE -ne 0) { throw "$suite failed with exit code $LASTEXITCODE" }

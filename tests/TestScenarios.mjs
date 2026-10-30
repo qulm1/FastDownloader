@@ -105,7 +105,7 @@ try {
   await run(['-Source', join(work, 'tasks.json')]);
   assert.equal(requests, before, 'completed task downloaded again');
   const list = await run(['-ListTasks']);
-  assert.match(list.output, /Completed/); assert.ok(!list.output.includes('?format='));
+  assert.match(list.output, /已完成/); assert.ok(!list.output.includes('?format='));
   passed('Source file autodetection, completed task skip and task listing without URL disclosure');
 
   for (const pathName of ['/chunked', '/no-range', '/redirect']) {

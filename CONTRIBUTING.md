@@ -37,6 +37,7 @@ $env:TEST_WORK_ROOT = 'D:\tmp\fastdownloader-tests'   # optional, defaults to %T
 
 node tests/TestDownload.mjs    # redirects, & in URLs, 16 MiB file, interrupt + R resume
 node tests/TestFaults.mjs      # loops, 403, hangs, size change, checksum, locking, collisions
+node tests/TestFeatures.mjs    # help text, network flags, task table, completion summary
 node tests/TestScenarios.mjs   # batch manifests, realistic paths, torrent + magnet transfers
 node tests/TestLauncher.mjs    # actual StartDownload.cmd entry point, missing-engine error
 ```
@@ -69,6 +70,10 @@ next to its scratch directory. Two warnings:
 
 - **Stay on Windows PowerShell 5.1.** No `??`, no ternary operator, no `-Parallel`,
   no `Get-Content -AsByteStream`. The script must load under 5.1 *and* 7.x.
+- **Interface text goes through the presentation helpers.** Use `Write-Muted`,
+  `Write-Accent`, `Write-Field`, `Format-Cell`, `Format-ByteSize` and `Format-Duration`
+  instead of ad-hoc `Write-Host` with colours, and read [docs/UI.md](docs/UI.md) before
+  adding a new colour, border or symbol. Downloads must not depend on the UI layer.
 - **Keep the entry point auditable.** Logic that is not about the interactive loop
   belongs in a function; keep `Start-Downloader` readable top to bottom.
 - **Never restore the BOM question by accident.** `FastDownload.ps1` and

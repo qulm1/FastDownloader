@@ -94,11 +94,30 @@ function Invoke-DownloadBatch {
 }
 
 function Show-DownloadTasks {
-    if (-not (Test-Path -LiteralPath $script:JobsRoot)) { Write-Host 'No saved tasks.'; return }
+    if (-not (Test-Path -LiteralPath $script:JobsRoot)) { Write-Muted '  还没有任务记录。'; return }
+    $rows = @()
     foreach ($path in Get-ChildItem -LiteralPath $script:JobsRoot -Filter task.json -Recurse -File) {
         try {
-            $record = Get-Content -LiteralPath $path.FullName -Raw | ConvertFrom-Json
-            Write-Host ('{0}  [{1}] {2}  {3}' -f $record.Id, $record.Status, $record.Label, $record.UpdatedAt)
-        } catch { Write-Warning ('Invalid task record: ' + $path.Directory.Name) }
+            $record = Read-JsonFile $path.FullName
+            $bytes = [double](Get-RecordField $record 'TotalBytes')
+            if ($bytes -le 0) { $bytes = [double](Get-TaskBytes $record.OutputDir) }
+            $status = '待开始'
+            if ($record.Status -eq 'Completed') { $status = '已完成' }
+            elseif ($record.Status -eq 'Incomplete') { $status = '未完成' }
+            elseif ($record.Status -eq 'Downloading') { $status = '下载中' }
+            $updated = [string]$record.UpdatedAt
+            try { $updated = ([datetime]$record.UpdatedAt).ToString('MM-dd HH:mm') } catch { }
+            $rows += [pscustomobject]@{
+                Status = $status; Size = (Format-ByteSize $bytes); Type = [string]$record.Type
+                Label = [string]$record.Label; Updated = $updated; SortKey = [string]$record.UpdatedAt
+            }
+        } catch { Write-Warning ('跳过无法读取的任务记录：' + $path.Directory.Name) }
     }
+    if ($rows.Count -eq 0) { Write-Muted '  还没有任务记录。'; return }
+    Write-Host ''
+    Write-Muted ((Format-Cell '状态' 8) + (Format-Cell '大小' 10) + (Format-Cell '类型' 4) + (Format-Cell '名称' 26) + '更新')
+    foreach ($row in ($rows | Sort-Object -Property SortKey -Descending)) {
+        Write-Host ((Format-Cell $row.Status 8) + (Format-Cell $row.Size 10) + (Format-Cell $row.Type 4) + (Format-Cell $row.Label 26) + $row.Updated)
+    }
+    Write-Host ''
 }
