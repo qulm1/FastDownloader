@@ -1,0 +1,47 @@
+name: Feature request
+description: Suggest a capability, or a better way to do something the tool already does.
+title: '[feature] '
+labels: ['enhancement']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        FastDownloader deliberately stays small: one script, one pinned engine, no
+        background service and no bundled extras. Proposals that fit that shape have a
+        much better chance. See the scope list in the README before filing.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to do that is currently awkward or impossible?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behaviour
+      description: What should the tool do? CLI flags, prompt behaviour, and file layout are all fair game.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Existing flags, other tools, or workarounds you tried.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - label: This does not require bypassing a login, paywall, DRM, captcha, or anti-bot system.
+          required: true
+        - label: This does not require a resident service, RPC listener, registry change, or new runtime dependency.
+          required: true
+        - label: I am willing to open a pull request for this.
+          required: false
