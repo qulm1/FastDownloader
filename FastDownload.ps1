@@ -212,7 +212,7 @@ function Show-AppHelp {
     Write-Host '    .\FastDownload.ps1 -ListTasks              查看任务'
     Write-Host ''
     Write-Host '  常用参数'
-    Write-Host '    -DownloadDir <目录>      保存根目录，默认 D:\Downloads\FastDownloads'
+    Write-Host '    -DownloadDir <目录>      保存根目录，优先 D 盘、其他非系统固定磁盘，最后用户下载目录'
     Write-Host '    -Connections <1-16>      单文件连接数，默认 8'
     Write-Host '    -Sha256 <64 位十六进制>   下载后校验，不一致不算完成'
     Write-Host '    -MaxSpeed <速率>         下载限速，例如 5M、800K'
@@ -526,9 +526,13 @@ function Invoke-Task {
 }
 
 function Get-DefaultDownloadDir {
-    # Prefer the D: data drive when the machine has one, otherwise use the profile so the
-    # default works on any Windows installation. Shared by the CLI and the GUI front-end.
-    if (Test-Path -LiteralPath 'D:\') { return 'D:\Downloads\FastDownloads' }
+    # Prefer D:, then other ready non-system fixed drives in drive-letter order.
+    $systemRoot = [IO.Path]::GetPathRoot($env:SystemRoot)
+    $dataDrives = @([IO.DriveInfo]::GetDrives() | Where-Object {
+        $_.DriveType -eq [IO.DriveType]::Fixed -and $_.IsReady -and
+        $_.Name -ne $systemRoot
+    } | Sort-Object @{ Expression = { if ($_.Name -eq 'D:\') { 0 } else { 1 } } }, Name)
+    if ($dataDrives.Count -gt 0) { return (Join-Path $dataDrives[0].Name 'Downloads\FastDownloads') }
     return (Join-Path $env:USERPROFILE 'Downloads\FastDownloads')
 }
 

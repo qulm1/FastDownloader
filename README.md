@@ -58,7 +58,7 @@ use. The full directory is required. [Desktop usage and tests](docs/GUI.md).
 
 The default destination is `D:\Downloads\FastDownloads\<label>-<task-id>`, one
 sub-directory per task so that different links with the same file name never
-overwrite each other. On machines without a `D:` drive the default falls back to
+overwrite each other. Prefer a non-system D: drive, then other ready non-system fixed drives in drive-letter order (Downloads\FastDownloads on that drive), then fall back to
 `%USERPROFILE%\Downloads\FastDownloads`; pass `-DownloadDir` to choose your own.
 
 ## What you can paste

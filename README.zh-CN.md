@@ -17,7 +17,7 @@ Windows 上的 aria2 下载前端：粘贴链接、回车、得到可校验的�
 HTTP 下载到种子文件后，aria2 会继续下载种子中的内容。种子默认下载全部文件。
 纯 BT v2 磁力（只有 `btmh`、没有 `btih`）不支持；请用支持 BT v2 的客户端。
 
-默认保存到 `D:\Downloads\FastDownloads`，每个任务单独一个子目录，防止不同链接的同名文件互相覆盖。机器上没有 D 盘时回落到 `%USERPROFILE%\Downloads\FastDownloads`；也可以用 `-DownloadDir` 指定别的位置。
+默认保存到 `D:\Downloads\FastDownloads`，每个任务单独一个子目录，防止不同链接的同名文件互相覆盖。优先非系统 D 盘，否则按盘符顺序选择其他就绪的非系统固定磁盘，保存到该盘的 Downloads\FastDownloads；没有可用数据盘时回落到 `%USERPROFILE%\Downloads\FastDownloads`；也可以用 `-DownloadDir` 指定别的位置。
 
 同一链接再次输入会续传；已完成任务会询问是否重新下载。
 按一次 Ctrl+C 后稍等保存退出；重新启动输入 `R`，选择未完成任务恢复。强制关闭窗口可能丢失最后几秒进度。
