@@ -1,4 +1,4 @@
-param([string]$WorkRoot = 'D:\FastDownloaderTests')
+param([string]$WorkRoot = (Join-Path $env:TEMP 'FastDownloaderTests'))
 $ErrorActionPreference = 'Stop'
 [void][IO.Directory]::CreateDirectory($WorkRoot)
 $work = Join-Path $WorkRoot ('engine-fault-' + [Guid]::NewGuid().ToString('N'))
