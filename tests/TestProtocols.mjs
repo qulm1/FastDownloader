@@ -92,13 +92,18 @@ try{
   await run(['-Source',untrusted,'-FileName','untrusted.bin'],1);
   assert.notEqual(task(untrusted).Status,'Completed');
   passed('HTTPS rejects an untrusted local certificate without changing Windows trust or disabling checks');
-  const url=process.env.TEST_HTTPS_URL||'https://www.microsoft.com/robots.txt';
-  const reference=join(work,'https-reference.txt');
-  await processRun('curl.exe',['--fail','--silent','--show-error','--location','--max-time','30','--output',reference,url]);
-  const expected=createHash('sha256').update(readFileSync(reference)).digest('hex');
-  await run(['-Source',url,'-FileName','https-public.txt','-Sha256',expected,'-StopAfterSeconds','45']);
-  const row=task(url);assert.equal(row.Status,'Completed');assert.ok(readFileSync(join(row.OutputDir,'https-public.txt')).equals(readFileSync(reference)));
-  passed('Actual official HTTPS transfer with system certificate validation and independent SHA-256');
+  if(process.env.SKIP_PUBLIC_HTTPS==='1'){
+    // Offline/CI mode: the remaining assertions above are all local and deterministic.
+    console.log('SKIP: public HTTPS comparison (SKIP_PUBLIC_HTTPS=1)');
+  } else {
+    const url=process.env.TEST_HTTPS_URL||'https://www.microsoft.com/robots.txt';
+    const reference=join(work,'https-reference.txt');
+    await processRun('curl.exe',['--fail','--silent','--show-error','--location','--max-time','30','--output',reference,url]);
+    const expected=createHash('sha256').update(readFileSync(reference)).digest('hex');
+    await run(['-Source',url,'-FileName','https-public.txt','-Sha256',expected,'-StopAfterSeconds','45']);
+    const row=task(url);assert.equal(row.Status,'Completed');assert.ok(readFileSync(join(row.OutputDir,'https-public.txt')).equals(readFileSync(reference)));
+    passed('Actual official HTTPS transfer with system certificate validation and independent SHA-256');
+  }
 }finally{
   for(const s of sockets)s.destroy();for(const p of passives)p.close();
   if(tlsServer){tlsServer.closeAllConnections();await new Promise(r=>tlsServer.close(r));}
