@@ -1,0 +1,27 @@
+# Normalise text files, but keep the line endings each platform needs.
+* text=auto
+
+# Windows scripts: CRLF in the working tree, so cmd.exe and PowerShell 5.1 behave
+# exactly like they do on a normal Windows checkout.
+*.ps1   text eol=crlf
+*.psm1  text eol=crlf
+*.cmd   text eol=crlf
+*.bat   text eol=crlf
+
+# Everything cross-platform reads better with LF.
+*.mjs   text eol=lf
+*.js    text eol=lf
+*.json  text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.md    text eol=lf
+*.csv   text eol=lf
+.gitignore    text eol=lf
+.gitattributes text eol=lf
+.editorconfig  text eol=lf
+
+# Never let Git touch these.
+*.exe   binary
+*.zip   binary
+*.pem   binary
+*.key   binary

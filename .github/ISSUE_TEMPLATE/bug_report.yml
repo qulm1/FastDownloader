@@ -1,0 +1,98 @@
+name: Bug report
+description: Something did not download, verified, or resume the way it should.
+title: '[bug] '
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. A minimal reproduction is far more useful than a log dump.
+
+        **Before you paste anything:** remove signed URLs (query tokens), cookies, proxy
+        passwords, and personal paths. `-DryRun` output is designed to be safe to share.
+
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Preflight
+      options:
+        - label: I searched existing issues and did not find the same problem.
+          required: true
+        - label: I removed secrets (URLs with tokens, cookies, proxy credentials) from this report.
+          required: true
+        - label: This is not a request to bypass a login, paywall, DRM, captcha, or anti-bot system.
+          required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: Actual behaviour, including the exact message shown.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      description: The exact command line or keystrokes. Redact the URL host if needed, but keep its shape.
+      placeholder: |
+        1. .\FastDownload.ps1 -Source 'https://example.com/big.iso' -Connections 8
+        2. Press Ctrl+C after 30 seconds
+        3. Run .\FastDownload.ps1 -Resume and choose task 1
+        4. ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: source-type
+    attributes:
+      label: Source type
+      multiple: true
+      options:
+        - HTTP or HTTPS link
+        - FTP link
+        - Magnet link (BT v1)
+        - .torrent file
+        - .meta4 or .metalink file
+        - Batch manifest (TXT / URLS / LST / CSV / JSON / .url)
+        - Local launcher (StartDownload.cmd)
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: 'Windows version, Windows PowerShell version, FastDownloader version, and whether the machine has a D: drive.'
+      placeholder: |
+        Windows 11 24H2 (x64)
+        Windows PowerShell 5.1.22621.4391
+        FastDownloader 2.0.0 (portable zip, from Releases)
+        D: drive: yes
+    validations:
+      required: true
+
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: Relevant output. `-DryRun` JSON and the `state\jobs\<id>\task.json` record (redacted) help most.
+      render: text
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: integrity
+    attributes:
+      label: Integrity check
+      options:
+        - label: I can still reproduce this after extracting a fresh copy of the release zip.
+          required: false
