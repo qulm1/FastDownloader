@@ -14,3 +14,5 @@ BT 与 FTP 是可控本机网络测试，不能证明所有公网节点、认证
 运行测试前设置 TEST_WORK_ROOT 指向 D 盘缓存。协议测试先以 PowerShell 7 执行 tests/NewTestCertificate.ps1 -OutputDir D:\测试缓存\tls，再设置 TEST_CERT_ROOT。测试会创建自己的服务并在结束时关闭；不会安装下载结果。所有原始记录只在本机证据目录，发行包不含任务状态、下载内容、令牌或测试私钥。
 
 最终便携包在 D 盘“中文 空格”新目录解压验收，不依赖开发源码路径。源码与发行包内主脚本/批量模块/引擎字节一致；发行采用白名单排除了私有 state、缓存、Cookie 与下载结果。日常运行不需要 Node.js。源码包不带第三方引擎，按 THIRD_PARTY.md 获取。
+
+测试脚本默认在系统临时目录创建临时工作区（可用 TEST_WORK_ROOT 覆盖）；协议测试中需要公网对比的那一段可用 SKIP_PUBLIC_HTTPS=1 跳过，其余 FTP、Metalink 与不可信证书断言仍在本机完成。
