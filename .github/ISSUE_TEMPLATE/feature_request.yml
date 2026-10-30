@@ -1,0 +1,15 @@
+name: Feature request / 功能建议
+description: 说明场景、目标和可验证的预期行为
+body:
+  - type: textarea
+    id: scenario
+    attributes:
+      label: 使用场景与目前遇到的困难
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 希望增加的行为及验收方式
+    validations:
+      required: true

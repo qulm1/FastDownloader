@@ -9,3 +9,8 @@ test-output/
 cookies.txt
 proxy.txt
 __pycache__/
+*.pfx
+*.p12
+.env
+.env.*
+local-config.json

@@ -1,0 +1,31 @@
+name: Bug report / 问题反馈
+description: 下载、续传、批量输入或启动问题
+body:
+  - type: markdown
+    attributes:
+      value: 请不要粘贴 Cookie、代理密码、签名下载链接、真实磁力或整个 state 目录。安全漏洞请先看 SECURITY.md。
+  - type: input
+    id: environment
+    attributes:
+      label: 环境
+      description: Windows、PowerShell 和工具版本；aria2 版本
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 用自建或公开、无令牌的小文件说明操作步骤；无需提供私人下载地址。
+    validations:
+      required: true
+  - type: textarea
+    id: expected_actual
+    attributes:
+      label: 预期结果与实际结果
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 脱敏后的错误片段
+      description: 删除下载链接中的令牌、用户信息、Cookie 和代理凭据。

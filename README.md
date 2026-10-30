@@ -2,7 +2,7 @@
 
 ## 日常使用
 
-双击桌面“极速下载助手”快捷方式，或本目录 `StartDownload.cmd`。
+完整下载或克隆本仓库，保留 `bin` 目录，双击本目录 `StartDownload.cmd`。仓库本身不含桌面快捷方式；此前本机已创建的“极速下载助手”快捷方式也可以使用。
 粘贴一个地址并按回车即可开始，不用手动给带 `&` 的网址加引号。
 
 支持：HTTP/HTTPS/FTP 文件链接、GitHub Release 文件直链、magnet 磁力链接、本地 `.torrent` / `.meta4` / `.metalink` 文件。
@@ -96,3 +96,9 @@ CSV 表头为 Source,FileName,Sha256；JSON 为对象数组，或 {"downloads":[
 执行 `./BuildRelease.ps1`，默认在 D:\softwere\Releases 产生 2.0 便携包和源码包。发行采用白名单，不打包本机 state、Cookie、代理配置、下载结果、测试缓存或证书私钥。便携包解压后双击 StartDownload.cmd，无需 Node.js 或开发源码位置；源码包需要按 THIRD_PARTY.md 取得 aria2。包装脚本许可为 MIT，第三方 aria2 的 GPL 和依赖许可独立保留。
 
 开发测试：设置 TEST_WORK_ROOT 到 D 盘后，分别运行 node tests/TestDownload.mjs、node tests/TestScenarios.mjs；协议测试按 TEST_REPORT.md 生成本机拒绝测试证书后执行 node tests/TestProtocols.mjs。不要提交真实任务状态和个人/公司数据。
+
+## GitHub 维护
+
+问题反馈、开发验证和发行检查见 [CONTRIBUTING.md](CONTRIBUTING.md)，安全问题见 [SECURITY.md](SECURITY.md)。目前提供统一的本地检查入口，GitHub Actions 工作流尚待单独接入；不能将本地通过视为 GitHub CI 已通过。公网 HTTPS 默认明确跳过，可用 -PublicHttps 单独选择执行。
+
+本地完整检查入口：`pwsh -NoProfile -File tests/RunChecks.ps1 -WorkRoot D:\FastDownloaderTests\new-run`。测试不使用仓库内已有任务状态，不会上传证书、下载结果或原始任务目录，也不会自动发布版本。

@@ -2,10 +2,14 @@ import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {spawn} from 'node:child_process';
 import {createHash} from 'node:crypto';
-import {mkdtempSync,readdirSync,readFileSync,writeFileSync,copyFileSync,mkdirSync} from 'node:fs';
+import {mkdtempSync,readdirSync,readFileSync,writeFileSync,copyFileSync,mkdirSync,cpSync} from 'node:fs';
 import {join,resolve} from 'node:path';
-const home=resolve(import.meta.dirname,'..');
-const work=mkdtempSync(join(process.env.TEST_WORK_ROOT||'D:/CodexNightWork/2026-10-24','launcher-'));
+const project=process.env.TEST_PACKAGE_ROOT||resolve(import.meta.dirname,'..');
+const work=mkdtempSync(join(process.env.TEST_WORK_ROOT||'D:/','launcher-'));
+// Never mix synthetic jobs with the developer's saved downloads.
+const home=join(work,'portable Chinese space');mkdirSync(home);
+for(const name of ['FastDownload.ps1','BatchDownload.ps1','StartDownload.cmd'])copyFileSync(join(project,name),join(home,name));
+cpSync(join(project,'bin'),join(home,'bin'),{recursive:true});
 const body=Buffer.alloc(1024*1024,73);
 const server=createServer((req,res)=>{res.writeHead(200,{'Content-Length':body.length});res.end(body)});
 await new Promise(r=>server.listen(0,'127.0.0.1',r));
