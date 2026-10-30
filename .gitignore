@@ -1,7 +1,9 @@
 state/
 downloads/
+dist/
 test-output/
 *.aria2
+*.session
 *.pem
 *.key
 *.log
@@ -9,3 +11,4 @@ test-output/
 cookies.txt
 proxy.txt
 __pycache__/
+node_modules/
