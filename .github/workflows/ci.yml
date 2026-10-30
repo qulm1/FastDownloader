@@ -1,0 +1,181 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  scripts:
+    name: PowerShell parse and encoding
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parse every script with the Windows PowerShell 5.1 parser
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $problems = @()
+          Get-ChildItem -Path . -Recurse -File -Include *.ps1, *.psm1 | ForEach-Object {
+            $tokens = $null
+            $errors = $null
+            [void][System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$tokens, [ref]$errors)
+            foreach ($parseError in $errors) {
+              $problems += ('{0}:{1}: {2}' -f $_.FullName, $parseError.Extent.StartLineNumber, $parseError.Message)
+            }
+          }
+          if ($problems.Count -gt 0) {
+            $problems | ForEach-Object { Write-Host "::error::$_" }
+            exit 1
+          }
+          Write-Host 'All PowerShell files parse cleanly under 5.1.'
+
+      - name: Non-ASCII scripts must keep their UTF-8 BOM
+        shell: pwsh
+        run: |
+          $bad = @()
+          Get-ChildItem -Path . -Recurse -File -Include *.ps1, *.psm1 | ForEach-Object {
+            $bytes = [System.IO.File]::ReadAllBytes($_.FullName)
+            $hasBom = $bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF
+            $nonAscii = $false
+            foreach ($byte in $bytes) {
+              if ($byte -gt 0x7F) { $nonAscii = $true; break }
+            }
+            if ($nonAscii -and -not $hasBom) { $bad += $_.FullName }
+          }
+          if ($bad.Count -gt 0) {
+            $bad | ForEach-Object { Write-Host "::error file=$_::File contains non-ASCII text but no UTF-8 BOM; Windows PowerShell 5.1 will misread it." }
+            exit 1
+          }
+          Write-Host 'Encoding policy satisfied.'
+
+  test:
+    name: Integration tests
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify the bundled engine is present
+        shell: pwsh
+        run: |
+          if (-not (Test-Path -LiteralPath 'bin\aria2c.exe')) { throw 'bin\aria2c.exe is missing from the checkout.' }
+          & 'bin\aria2c.exe' --version | Select-Object -First 1
+
+      - name: Download, faults and launcher suites
+        shell: pwsh
+        env:
+          TEST_WORK_ROOT: ${{ runner.temp }}\fastdownloader-tests
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force -Path $env:TEST_WORK_ROOT | Out-Null
+          foreach ($suite in 'TestDownload', 'TestFaults', 'TestLauncher') {
+            Write-Host "::group::$suite"
+            node "tests/$suite.mjs"
+            if ($LASTEXITCODE -ne 0) { throw "$suite failed with exit code $LASTEXITCODE" }
+            Write-Host '::endgroup::'
+          }
+
+      - name: Engine failure injection (disk full)
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $root = Join-Path $env:RUNNER_TEMP 'engine-fault-tests'
+          powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File tests\TestEngineFault.ps1 -WorkRoot $root
+          if ($LASTEXITCODE -ne 0) { throw "TestEngineFault.ps1 failed with exit code $LASTEXITCODE" }
+
+      - name: Scenario suite (batch manifests, torrent and magnet transfers)
+        shell: pwsh
+        env:
+          TEST_WORK_ROOT: ${{ runner.temp }}\fastdownloader-tests
+        run: |
+          $ErrorActionPreference = 'Stop'
+          node tests/TestScenarios.mjs
+          if ($LASTEXITCODE -ne 0) { throw "TestScenarios failed with exit code $LASTEXITCODE" }
+
+      - name: Upload test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-evidence
+          path: ${{ runner.temp }}/fastdownloader-tests/**/test-evidence.json
+          if-no-files-found: ignore
+
+  protocols:
+    name: Protocol tests (FTP, Metalink, TLS)
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Generate the throwaway test certificate
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          pwsh -NoLogo -NoProfile -File tests/NewTestCertificate.ps1 -OutputDir "$env:RUNNER_TEMP/certs"
+          if ($LASTEXITCODE -ne 0) { throw 'Certificate generation failed.' }
+
+      - name: FTP, Metalink and untrusted-TLS suites
+        shell: pwsh
+        env:
+          TEST_WORK_ROOT: ${{ runner.temp }}\fastdownloader-tests
+          TEST_CERT_ROOT: ${{ runner.temp }}/certs
+          # The public-HTTPS comparison depends on a third-party site; run it manually.
+          SKIP_PUBLIC_HTTPS: '1'
+        run: |
+          $ErrorActionPreference = 'Stop'
+          node tests/TestProtocols.mjs
+          if ($LASTEXITCODE -ne 0) { throw "TestProtocols failed with exit code $LASTEXITCODE" }
+
+  package:
+    name: Release packages build
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build both packages
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          ./BuildRelease.ps1 -Version 0.0.0-ci -OutputDir "$env:RUNNER_TEMP/dist"
+
+      - name: Check package contents
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $dist = Join-Path $env:RUNNER_TEMP 'dist'
+          $portable = Join-Path $dist 'FastDownloader-0.0.0-ci.zip'
+          $source = Join-Path $dist 'FastDownloader-0.0.0-ci-source.zip'
+          foreach ($zip in $portable, $source) { if (-not (Test-Path -LiteralPath $zip)) { throw "Missing $zip" } }
+          $expanded = Join-Path $env:RUNNER_TEMP 'expanded'
+          Expand-Archive -LiteralPath $portable -DestinationPath $expanded
+          foreach ($required in 'FastDownload.ps1', 'StartDownload.cmd', 'bin\aria2c.exe', 'LICENSE', 'THIRD_PARTY.md') {
+            if (-not (Test-Path -LiteralPath (Join-Path $expanded $required))) { throw "Portable package is missing $required" }
+          }
+          foreach ($forbidden in 'state', 'downloads', 'test-output') {
+            if (Test-Path -LiteralPath (Join-Path $expanded $forbidden)) { throw "Portable package must not contain $forbidden" }
+          }
+          Write-Host 'Package checks passed.'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: ${{ runner.temp }}/dist/*.zip
+          if-no-files-found: error
