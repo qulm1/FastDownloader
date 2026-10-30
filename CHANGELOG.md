@@ -6,6 +6,21 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- WPF desktop UI: StartDownloadGui.cmd, multi-input import, task cards, destination,
+  status filters, pause/resume/stop, sequential queue and graceful shutdown.
+- Shared default-directory helper; the 2.1 CLI and its network options are retained.
+- Real engine telemetry via per-process authenticated loopback RPC (GUI only),
+  headless WPF event/transfer tests, offscreen previews and portable package checks.
+
+### Fixed
+
+- GUI startup no longer inherits the CLI's LibraryOnly flag and exits immediately.
+- Preallocated files and missing telemetry never manufacture completed percentages.
+- Release allowlists name files explicitly, including GUI modules, and exclude
+  private files placed inside bin/tests/docs as well as the root state directory.
+
 ## [2.1.0] - 2026-10-30
 
 ### Added

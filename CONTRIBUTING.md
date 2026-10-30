@@ -27,8 +27,9 @@ git checkout -b fix/your-topic
 .\FastDownload.ps1 -Source 'https://example.com/file.zip' -DryRun
 ```
 
-There is no build step, no package manager, and no compile of our own code. Node.js
-is used only to drive the integration tests.
+There is no package manager or external build tool. The optional WPF GUI loads a
+small C# control helper with the system .NET compiler in memory; no SDK install or
+extra binary is needed. Node.js is used only to drive the integration tests.
 
 ## Running the tests
 
@@ -40,6 +41,7 @@ node tests/TestFaults.mjs      # loops, 403, hangs, size change, checksum, locki
 node tests/TestFeatures.mjs    # help text, network flags, task table, completion summary
 node tests/TestScenarios.mjs   # batch manifests, realistic paths, torrent + magnet transfers
 node tests/TestLauncher.mjs    # actual StartDownload.cmd entry point, missing-engine error
+node tests/TestGui.mjs         # WPF events, local transfer/recovery and offscreen images
 ```
 
 `tests/TestProtocols.mjs` needs two extra things and is therefore not part of the
