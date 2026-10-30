@@ -1,4 +1,4 @@
-# 极速下载助手 2.0（FastDownloader）
+# 极速下载助手 2.1（FastDownloader）
 
 [![CI](https://github.com/qulm1/FastDownloader/actions/workflows/ci.yml/badge.svg)](https://github.com/qulm1/FastDownloader/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -20,6 +20,39 @@ HTTP 下载到种子文件后，aria2 会继续下载种子中的内容。种子
 同一链接再次输入会续传；已完成任务会询问是否重新下载。
 按一次 Ctrl+C 后稍等保存退出；重新启动输入 `R`，选择未完成任务恢复。强制关闭窗口可能丢失最后几秒进度。
 请不要删除未完成文件旁的 `.aria2` 文件，或本工具的 `state` 文件夹。
+
+## 界面
+
+启动时只有两行信息和一个提示符，命令是四个单字母：
+
+```text
+FastDownloader 2.1.0  ·  aria2 1.37.0
+保存到 D:\Downloads\FastDownloads
+
+粘贴链接或清单路径   R 续传   L 任务   H 帮助   Q 退出
+
+>
+```
+
+下载结束后只有一段摘要，不刷屏：
+
+```text
+  完成
+  文件  payload.bin
+  大小  5.0 MB · 不到 1 秒 · 25.0 MB/s
+  校验  SHA-256 通过 · 16b632f11cf950dd…
+  位置  D:\Downloads\FastDownloads\127.0.0.1-d213feaae89b91b8a68e
+```
+
+`L` 或 `-ListTasks` 给出对齐的任务表（状态、大小、类型、名称、更新时间），并且不显示带令牌的完整网址：
+
+```text
+状态      大小        类型  名称                        更新
+已完成    1.2 MB      URL   示例 文件                   10-30 15:02
+未完成    2.0 MB      BT    老任务                      10-29 09:11
+```
+
+设计规则（一个强调色、用留白而不是边框、两字标签、颜色不单独承载信息）写在 `docs/UI.md`。
 
 ## 速度与能力边界
 
@@ -56,6 +89,18 @@ HTTP 下载到种子文件后，aria2 会继续下载种子中的内容。种子
 
 # 同一 latest 链接已经完成，但远端内容更新后另建任务
 .\FastDownload.ps1 -Source 'https://example.com/latest.zip' -NewTask
+
+# 下载限速 5 MB/s，沿用系统（IE）代理，附加请求头；代理只读不改
+.\FastDownload.ps1 -Source 'https://example.com/big.iso' -MaxSpeed 5M -UseSystemProxy -Header 'Accept-Language: zh-CN'
+
+# HTTP 基本认证：账号密码会记录在任务文件里，state 目录不要外传
+.\FastDownload.ps1 -Source 'https://example.com/private.zip' -HttpUser alice -HttpPassword '<密码>'
+
+# 来源没有校验值时，完成后自己算一遍 SHA-256
+.\FastDownload.ps1 -Source 'https://example.com/file.zip' -ShowHash
+
+# 查看简短用法（完整说明用 Get-Help .\FastDownload.ps1 -Full）
+.\FastDownload.ps1 -Help
 
 # 仅验证输入与参数，不下载；或选择未完成任务恢复
 .\FastDownload.ps1 -Source 'magnet:?xt=urn:btih:<有效infohash>' -DryRun

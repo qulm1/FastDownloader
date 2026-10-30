@@ -95,7 +95,17 @@ crash never leaves half a record):
   "Referer": null,
   "CookieFile": null,
   "Proxy": null,
-  "SelectFile": null
+  "SelectFile": null,
+  "MaxSpeed": null,
+  "MaxUpload": "1M",
+  "UserAgent": null,
+  "Header": [],
+  "HttpUser": null,
+  "HttpPassword": null,
+  "UseSystemProxy": false,
+  "TotalBytes": 0,
+  "ElapsedSeconds": 0,
+  "FinishedAt": null
 }
 ```
 
@@ -121,9 +131,14 @@ the process as discrete argv elements, not as parsed script text.
 | Isolation | `--no-conf=true`, `--no-netrc=true`, `--enable-rpc=false` | a user-level `aria2.conf` cannot change behaviour; nothing listens on a port |
 | Resume | `--continue=true`, `--always-resume=true`, `--auto-file-renaming=false`, `--allow-overwrite=false`, `--save-session`, `--save-session-interval=5`, `--input-file=<session>` | resume the same bytes instead of silently starting a second file |
 | Integrity | `--check-certificate=true`, `--check-integrity=true`, `--checksum=sha-256=…` | never trade validation for convenience |
-| Performance | `--split`, `--max-connection-per-server`, `--min-split-size=4M`, `--disk-cache=32M`, `--max-concurrent-downloads=1` | one task at a time, bounded connections |
-| BT | `--enable-dht=true`, `--enable-peer-exchange=true`, `--bt-enable-lpd=false`, `--bt-max-peers=80`, `--seed-time=0`, `--max-overall-upload-limit=1M`, `--dht-file-path=<job>\dht.dat` | finish-and-stop seeding, capped uploads, no local peer discovery |
+| Performance | `--split`, `--max-connection-per-server`, `--min-split-size=4M`, `--disk-cache=32M`, `--max-concurrent-downloads=1`, `--max-overall-download-limit=<MaxSpeed>` | one task at a time, bounded connections, optional cap |
+| BT | `--enable-dht=true`, `--enable-peer-exchange=true`, `--bt-enable-lpd=false`, `--bt-max-peers=80`, `--seed-time=0`, `--max-overall-upload-limit=<MaxUpload>`, `--dht-file-path=<job>\dht.dat` | finish-and-stop seeding, capped uploads, no local peer discovery |
+| Request context | `--referer`, `--all-proxy`, `--user-agent`, `--header`, `--http-user`, `--http-passwd`, `--load-cookies` | per-task context, always validated before it reaches argv |
 | Diagnostics | `--console-log-level=warn`, `--summary-interval=10`, `--download-result=full` | progress without flooding the console |
+
+The wrapper adds no progress rendering of its own: aria2 owns the live progress output,
+and the wrapper speaks only once the task settles (completion card or incomplete note).
+That split is deliberate — two progress displays would fight over the same lines.
 
 `-DryRun` prints only type, connection count, destination, and argument count — not
 the source, cookies, or proxy credentials — so a bug report can be pasted safely.

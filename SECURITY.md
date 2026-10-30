@@ -61,7 +61,13 @@ anonymous. Please give us a reasonable window before public disclosure.
 - Certificate validation is always on (`--check-certificate=true`); this Schannel-based
   build cannot pin a custom CA and deliberately does not try.
 - No RPC listener (`--enable-rpc=false`), no service, no scheduled task.
-- Cookies come only from a file you pass explicitly; browsers are never read.
+- Cookie files are read only from a path you pass explicitly; browsers are never read.
+- HTTP basic-auth credentials (`-HttpUser` / `-HttpPassword`) and custom `-Header` values
+  are recorded in `state\jobs\<id>\task.json` so a resume can reuse them. They are stored
+  in clear text, exactly like the signed URLs and Cookie file paths 2.0 already kept:
+  treat `state\` as private, and prefer a short-lived token over a long-lived password.
+- `-UseSystemProxy` only reads `HKCU\...\Internet Settings`; the wrapper never writes to
+  the registry and never changes the system proxy.
 - Downloads are never opened, extracted, or executed automatically.
 
 ## Handling of your report data

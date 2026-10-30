@@ -89,6 +89,15 @@ In the interactive prompt, `L` lists known tasks, `R` resumes an unfinished one,
 # Same "latest" URL, but the remote content changed — start a new task
 .\FastDownload.ps1 -Source 'https://example.com/latest.zip' -NewTask
 
+# Cap the download rate at 5 MB/s, reuse the Windows proxy, send extra headers
+.\FastDownload.ps1 -Source 'https://example.com/big.iso' -MaxSpeed 5M -UseSystemProxy -Header 'Accept-Language: zh-CN'
+
+# HTTP basic auth (stored in the task record — treat state\ as private)
+.\FastDownload.ps1 -Source 'https://example.com/private.zip' -HttpUser alice -HttpPassword '<password>'
+
+# Print the computed SHA-256 when the source provides no checksum
+.\FastDownload.ps1 -Source 'https://example.com/file.zip' -ShowHash
+
 # Validate input and arguments without downloading, list tasks, resume
 .\FastDownload.ps1 -Source 'magnet:?xt=urn:btih:<info-hash>' -DryRun
 .\FastDownload.ps1 -ListTasks
@@ -103,7 +112,13 @@ In the interactive prompt, `L` lists known tasks, `R` resumes an unfinished one,
 | `-Connections` | `8` (1–16) | aria2 `--split` / `--max-connection-per-server` |
 | `-FileName` | engine decides | URL tasks only; must be a bare file name |
 | `-Sha256` | — | Expected SHA-256 of the finished file |
+| `-MaxSpeed` | unlimited | Download cap, e.g. `5M`, `800K` |
+| `-MaxUpload` | `1M` | BT upload cap; `0` disables the cap |
 | `-Referer`, `-CookieFile`, `-Proxy` | — | Per-task request context; never stored globally |
+| `-UseSystemProxy` | off | Read the Windows (Internet Settings) proxy for this task only |
+| `-UserAgent` | `FastDownloader/<version> aria2/1.37.0` | Override the User-Agent |
+| `-Header` | — | Extra request header, `'Name: Value'`; repeatable |
+| `-HttpUser`, `-HttpPassword` | — | HTTP basic auth; recorded in `task.json` |
 | `-SelectFile` | all files | Torrent file indices, e.g. `1,3-5` |
 | `-BatchFile` | — | Manifest path; see below |
 | `-FailFast` | off | Stop the batch at the first failure |
@@ -111,12 +126,45 @@ In the interactive prompt, `L` lists known tasks, `R` resumes an unfinished one,
 | `-Resume` | off | Pick an unfinished task interactively |
 | `-ListTasks` | off | Print known tasks and exit |
 | `-DryRun` | off | Validate only; prints a redacted JSON summary |
+| `-ShowHash` | off | Compute and print the SHA-256 after a download |
+| `-NoColor` | off | Disable colour (also honours `NO_COLOR`) |
+| `-Help` | off | Print the short usage page |
 | `-StopAfterSeconds` | `0` | Pass `--stop=<n>` to aria2 (used by tests) |
 | `-LibraryOnly` | off | Dot-source the script without running it |
 
 Advanced parameters apply to new tasks only. Resuming reuses the recorded
 directory, file name, checksum, and Cookie path, so different files are never
 mixed in one task.
+
+Full parameter documentation is available offline:
+
+```powershell
+.\FastDownload.ps1 -Help
+Get-Help .\FastDownload.ps1 -Full
+```
+
+## Interface
+
+The console UI follows a small set of rules — one accent colour, whitespace instead
+of borders, two-character labels, colour never the only signal — described in
+[docs/UI.md](docs/UI.md). A finished task looks like this:
+
+```text
+  完成
+  文件  payload.bin
+  大小  5.0 MB · 不到 1 秒 · 25.0 MB/s
+  校验  SHA-256 通过 · 16b632f11cf950dd…
+  位置  D:\Downloads\FastDownloads\127.0.0.1-d213feaae89b91b8a68e
+```
+
+`-ListTasks` prints an aligned table (status, size, type, name, update time) and
+never shows full URLs, because a task record can contain signed tokens:
+
+```text
+状态      大小        类型  名称                        更新
+已完成    1.2 MB      URL   示例 文件                   10-30 15:02
+未完成    2.0 MB      BT    老任务                      10-29 09:11
+```
 
 ## Batch manifests
 
@@ -215,6 +263,7 @@ bin/                    aria2 1.37.0 Windows x64 and its upstream license files
 tests/                  Node.js integration and fault-injection tests
 examples/               Sample CSV and JSON manifests
 docs/ARCHITECTURE.md    How a paste becomes a verified file
+docs/UI.md              Interface rules (one accent, whitespace, aligned labels)
 ```
 
 ## Contributing

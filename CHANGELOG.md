@@ -6,6 +6,46 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-10-30
+
+### Added
+
+- `-Help` and a comment-based help block, so `.\FastDownload.ps1 -Help` prints a short
+  usage page and `Get-Help .\FastDownload.ps1 -Full` documents every parameter offline.
+- Completion card after a download: file name, size, elapsed time, average speed,
+  checksum result, and destination on five aligned lines.
+- `-ShowHash` to compute and print the SHA-256 when the source provides no checksum;
+  files up to 512 MiB are hashed automatically.
+- Task list is now an aligned table (status, size, type, name, update time) that also
+  accepts 2.0 records and still never prints full URLs.
+- `-MaxSpeed` (download cap) and `-MaxUpload` (BT upload cap, `0` disables it).
+- `-UseSystemProxy` reads the Windows Internet Settings proxy for one task; it never
+  writes to the registry.
+- `-UserAgent`, `-Header` (repeatable `'Name: Value'`), `-HttpUser` and `-HttpPassword`
+  for per-request control. Invalid headers and an orphan password are rejected before
+  any network work; `-DryRun` never echoes the password.
+- `-NoColor` and `NO_COLOR` support; colour is also disabled when output is redirected.
+- `tests/TestFeatures.mjs` covers the help page, the new flags, redaction, the task
+  table and the completion card.
+- `docs/UI.md` records the interface rules (one accent colour, whitespace over borders,
+  two-character labels, colour never the only signal).
+
+### Changed
+
+- Interactive banner is now two lines plus a one-line command hint, printed once per
+  session; the prompt is a caret instead of a `下载地址:` label.
+- `H` in interactive mode prints the help page.
+- Progress lines written by the wrapper are muted; aria2's own progress output is
+  untouched.
+- Task records gain `MaxSpeed`, `MaxUpload`, `UserAgent`, `Header`, `HttpUser`,
+  `HttpPassword`, `TotalBytes`, `ElapsedSeconds` and `FinishedAt`; records are always
+  read as UTF-8 so hand-edited or BOM-less records keep their Chinese labels.
+
+### Fixed
+
+- Task records written without a UTF-8 BOM were read with the ANSI code page, which
+  mangled Chinese file labels in the task list.
+
 ## [2.0.1] - 2026-10-30
 
 ### Added
