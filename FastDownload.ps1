@@ -218,7 +218,12 @@ function Invoke-Task {
 }
 
 function Start-Downloader {
-    if (-not $DownloadDir) { $DownloadDir = 'D:\Downloads\FastDownloads' }
+    if (-not $DownloadDir) {
+        # Prefer the D: data drive when the machine has one, otherwise use the profile so
+        # the default works on any Windows installation.
+        if (Test-Path -LiteralPath 'D:\') { $DownloadDir = 'D:\Downloads\FastDownloads' }
+        else { $DownloadDir = Join-Path $env:USERPROFILE 'Downloads\FastDownloads' }
+    }
     $destination = [IO.Path]::GetFullPath($DownloadDir)
     if ($ListTasks) { Show-DownloadTasks; return 0 }
     if ($BatchFile -and ($Source -or $Resume)) { Write-Host 'BatchFile 与 Source/Resume 不能同时使用。' -ForegroundColor Red; return 1 }
