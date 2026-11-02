@@ -9,7 +9,7 @@ Windows 上的 aria2 下载前端：粘贴链接、回车、得到可校验的�
 
 ## 日常使用
 
-**图形窗口：双击 `StartDownloadGui.cmd`。** 支持任务卡片、多个链接/清单、选择保存位置、实际进度、暂停/继续和断点恢复，详见 [图形界面说明](docs/GUI.md)。完整保留工具目录，无需安装 Node.js 或其他 GUI 框架。
+**图形窗口：双击 `FastDownloader.exe (in the parent directory)`。** 支持任务卡片、多个链接/清单、选择保存位置、实际进度、暂停/继续和断点恢复，详见 [图形界面说明](docs/GUI.md)。完整保留工具目录，无需安装 Node.js 或其他 GUI 框架。
 
 双击 `StartDownload.cmd`（或发行包里的同名入口），粘贴一个地址并按回车即可开始，不用手动给带 `&` 的网址加引号。
 
@@ -152,3 +152,7 @@ CSV 表头为 Source,FileName,Sha256；JSON 为对象数组，或 {"downloads":[
 `tests\TestDownload.mjs` 为开发者测试（需要 Node.js），使用临时的本机 HTTP 服务验证跳转、含 `&` 的网址、下载、SHA-256、主动中断、R 菜单续传、磁力参数、中文种子路径与种子离线解析。
 
 新增集成测试使用自己生成的种子、自建 Tracker 和独立 aria2 种子端，实测 torrent/magnet 元数据和完整内容传输；不代表任意公网磁力都有活跃做种节点。日常下载不依赖 Node.js，只需要 Windows 自带的 PowerShell 和本目录 bin 程序。
+
+## 目录结构
+
+双击上一级目录的 `FastDownloader.exe` 打开 WPF 界面，这是根目录唯一的启动文件。`app` 收纳引擎、脚本、文档与测试；开发命令请在 `app` 中运行，命令行入口为 `app\StartDownload.cmd`（相对根目录）。任务状态继续保存在根目录的 `state`，已有任务无需搬动。Git 元数据和 CI 配置保留在仓库根目录。

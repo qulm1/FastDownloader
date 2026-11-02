@@ -97,7 +97,7 @@ $ErrorActionPreference = 'Stop'
 try { [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false); $OutputEncoding = [Console]::OutputEncoding } catch { }
 $script:ToolRoot = $PSScriptRoot
 $script:Engine = Join-Path $PSScriptRoot 'bin\aria2c.exe'
-if (-not $StateDir) { $StateDir = Join-Path $PSScriptRoot 'state' }
+if (-not $StateDir) { $StateDir = Join-Path (Split-Path -Parent $PSScriptRoot) 'state' }
 $script:JobsRoot = Join-Path ([IO.Path]::GetFullPath($StateDir)) 'jobs'
 $script:Interactive = -not $PSBoundParameters.ContainsKey('Source') -and -not $Resume -and -not $BatchFile -and -not $ListTasks
 . (Join-Path $PSScriptRoot 'BatchDownload.ps1')
