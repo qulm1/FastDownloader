@@ -51,7 +51,7 @@ Most download helpers are either GUI applications you cannot audit or one-off
 3. Double-click `StartDownload.cmd`.
 4. Paste a download URL and press Enter.
 
-For an actual graphical window, double-click **StartDownloadGui.cmd**. It supports
+For an actual graphical window, double-click **FastDownloader.exe (in the parent directory)**. It supports
 task cards, multi-input import, destination selection, progress, pause/resume and
 recovery. Windows PowerShell 5.1 / WPF are built in; no Node.js is needed for daily
 use. The full directory is required. [Desktop usage and tests](docs/GUI.md).
@@ -286,3 +286,7 @@ GPL-2.0-or-later and keeps its own license; see [THIRD_PARTY.md](THIRD_PARTY.md)
 
 Not affiliated with the aria2 project. Download only what you have the right to
 access.
+
+## Directory layout
+
+Double-click `../FastDownloader.exe` to open the WPF app. This is the only root-level launch file. The `app` directory contains the engine, scripts, documentation and tests. Run developer commands from `app`; the CLI launcher is `app/StartDownload.cmd` relative to the package root. Task state stays in the root `state` directory, including existing tasks. Git metadata and CI configuration remain at repository root.

@@ -1,6 +1,6 @@
 # WPF 图形界面
 
-在 `D:\FastDownloader`（或完整发行目录）双击 **StartDownloadGui.cmd**。这是实际的 WPF 图形窗口，原命令行入口 StartDownload.cmd 保留。需要 Windows 自带的 Windows PowerShell 5.1、WPF/.NET Framework 及随包 aria2，不需要 Node.js、Python、PowerShell 7 或另装 GUI 框架。
+在程序根目录（如 `D:\FastDownloader` 或完整便携包目录）双击 **FastDownloader.exe**。其余文件都在 `app` 文件夹内，命令行入口为 `app\StartDownload.cmd`。需要 Windows 自带的 Windows PowerShell 5.1、WPF/.NET Framework 及随包 aria2，不需要 Node.js、Python、PowerShell 7 或另装 GUI 框架。
 
 ## 操作
 

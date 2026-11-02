@@ -10,13 +10,16 @@ $null = New-Item -ItemType Directory -Path $OutputDir -Force
 $stage = Join-Path $OutputDir ('FastDownloader-' + $Version + '-stage-' + [Guid]::NewGuid().ToString('N'))
 $null = New-Item -ItemType Directory -Path $stage
 
+$payload = Join-Path $stage 'app'
+$null = New-Item -ItemType Directory -Path $payload
+& (Join-Path $PSScriptRoot 'BuildLauncher.ps1') -OutputPath (Join-Path $stage 'FastDownloader.exe')
+
 # Whitelist packaging: only these items can ever reach a release.
 $shipped = @(
-    'FastDownload.ps1', 'BatchDownload.ps1', 'StartDownload.cmd', 'BuildRelease.ps1',
+    'Launcher.cs', 'BuildLauncher.ps1', 'FastDownload.ps1', 'BatchDownload.ps1', 'StartDownload.cmd', 'BuildRelease.ps1',
     'FastDownloadGui.ps1', 'StartDownloadGui.cmd', 'GuiApp.ps1', 'GuiTasks.ps1', 'GuiView.ps1', 'GuiEngine.cs',
     'README.md', 'README.zh-CN.md', 'CHANGELOG.md', 'CONTRIBUTING.md', 'SECURITY.md',
     'CODE_OF_CONDUCT.md', 'LICENSE', 'THIRD_PARTY.md', 'TEST_REPORT.md',
-    '.gitignore', '.gitattributes', '.editorconfig',
     'docs/ARCHITECTURE.md', 'docs/UI.md', 'docs/GUI.md',
     'tests/NewTestCertificate.ps1', 'tests/TestDownload.mjs', 'tests/TestFaults.mjs', 'tests/TestFeatures.mjs',
     'tests/TestScenarios.mjs', 'tests/TestProtocols.mjs', 'tests/TestLauncher.mjs', 'tests/TestEngineFault.ps1',
@@ -28,7 +31,7 @@ try {
     foreach ($name in $shipped) {
         $path = Join-Path $PSScriptRoot $name
         if (Test-Path -LiteralPath $path) {
-            $target=Join-Path $stage $name
+            $target=Join-Path $payload $name
             $null=New-Item -ItemType Directory -Path (Split-Path -Parent $target) -Force
             Copy-Item -LiteralPath $path -Destination $target
         } else {
@@ -40,9 +43,9 @@ try {
     Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $sourceZip -Force
 
     # The portable package adds the pinned engine; the source package never carries it.
-    $null=New-Item -ItemType Directory -Path (Join-Path $stage 'bin') -Force
+    $null=New-Item -ItemType Directory -Path (Join-Path $payload 'bin') -Force
     foreach($name in @('aria2c.exe','AUTHORS','COPYING','ChangeLog','LICENSE.OpenSSL','NEWS','README.html','README.mingw')) {
-        Copy-Item -LiteralPath (Join-Path $PSScriptRoot ('bin/'+$name)) -Destination (Join-Path $stage 'bin')
+        Copy-Item -LiteralPath (Join-Path $PSScriptRoot ('bin/'+$name)) -Destination (Join-Path $payload 'bin')
     }
     $portableZip = Join-Path $OutputDir ('FastDownloader-' + $Version + '.zip')
     Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $portableZip -Force
@@ -52,5 +55,10 @@ try {
 } finally {
     $resolved = [IO.Path]::GetFullPath($stage)
     $expected = $OutputDir.TrimEnd('\') + '\FastDownloader-' + $Version + '-stage-'
-    if ($resolved.StartsWith($expected, [StringComparison]::OrdinalIgnoreCase)) { Remove-Item -LiteralPath $resolved -Recurse -Force }
+    if ($resolved.StartsWith($expected, [StringComparison]::OrdinalIgnoreCase)) {
+        for ($attempt = 0; $attempt -lt 5; $attempt++) {
+            try { Remove-Item -LiteralPath $resolved -Recurse -Force -ErrorAction Stop; break }
+            catch { if ($attempt -eq 4) { throw }; Start-Sleep -Milliseconds 500 }
+        }
+    }
 }

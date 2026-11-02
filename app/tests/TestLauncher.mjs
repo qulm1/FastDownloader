@@ -26,7 +26,7 @@ async function run(exe,args,input,expected=0){
 }
 try{
  await run('cmd.exe',['/d','/c','StartDownload.cmd'],url+'\r\nQ\r\n');
- const jobs=join(home,'state/jobs');
+ const jobs=join(home,'../state/jobs');
  const record=readdirSync(jobs).map(id=>JSON.parse(readFileSync(join(jobs,id,'task.json'),'utf8').replace(/^\uFEFF/,''))).find(x=>x.Source===url);
  assert.ok(record);assert.equal(record.Status,'Completed');
  assert.ok(record.OutputDir.toLowerCase().startsWith(defaultRoot.toLowerCase()+sep),'default output root: '+record.OutputDir);

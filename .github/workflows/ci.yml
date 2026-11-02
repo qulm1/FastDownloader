@@ -13,6 +13,10 @@ concurrency:
 permissions:
   contents: read
 
+defaults:
+  run:
+    working-directory: app
+
 jobs:
   scripts:
     name: PowerShell parse and encoding
@@ -175,11 +179,12 @@ jobs:
           foreach ($zip in $portable, $source) { if (-not (Test-Path -LiteralPath $zip)) { throw "Missing $zip" } }
           $expanded = Join-Path $env:RUNNER_TEMP 'expanded'
           Expand-Archive -LiteralPath $portable -DestinationPath $expanded
+          if (-not (Test-Path (Join-Path $expanded 'FastDownloader.exe'))) { throw 'Missing GUI executable' }
           foreach ($required in 'FastDownload.ps1', 'StartDownload.cmd', 'FastDownloadGui.ps1', 'StartDownloadGui.cmd', 'GuiApp.ps1', 'GuiTasks.ps1', 'GuiView.ps1', 'GuiEngine.cs', 'bin\aria2c.exe', 'LICENSE', 'THIRD_PARTY.md') {
-            if (-not (Test-Path -LiteralPath (Join-Path $expanded $required))) { throw "Portable package is missing $required" }
+            if (-not (Test-Path -LiteralPath (Join-Path $expanded ('app/' + $required)))) { throw "Portable package is missing $required" }
           }
           foreach ($forbidden in 'state', 'downloads', 'test-output') {
-            if (Test-Path -LiteralPath (Join-Path $expanded $forbidden)) { throw "Portable package must not contain $forbidden" }
+            if (Test-Path -LiteralPath (Join-Path $expanded ('app/' + $forbidden))) { throw "Portable package must not contain $forbidden" }
           }
           Write-Host 'Package checks passed.'
 
